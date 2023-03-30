@@ -14,7 +14,7 @@ xrange = range
 def tensorize(smiles, assm=True):
     mol_tree = MolTree(smiles)
     if (mol_tree.n_errors > 0):
-        return None
+        return '_None_'
     mol_tree.recover()
     if assm:
         mol_tree.assemble()
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     total_input_count = len(all_data)
     print("The total preprocess input size: all_data : ", total_input_count)
 
-    all_data = list(filter(lambda x: x is not None, all_data))
+    all_data = list(filter(lambda x: x is not None and x != '_None_', all_data))
     print("The total preprocess input size after filter: ", len(all_data))
 
     # Write filtered training set to output
