@@ -1,7 +1,9 @@
 import rdkit
 import rdkit.Chem as Chem
-from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
-from .vocab import *
+from chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
+from vocab import *
+import pprint
+import json
 
 class MolTreeNode(object):
 
@@ -60,6 +62,7 @@ class MolTreeNode(object):
 class MolTree(object):
 
     def __init__(self, smiles):
+        # print('MolTree init. smiles: ', smiles)
         self.smiles = smiles
         self.mol = get_mol(smiles)
 
@@ -73,6 +76,8 @@ class MolTree(object):
         self.nodes = []
         self.n_errors = 0
         root = 0
+        # print('cliques: ', json.dumps(cliques, indent=2))
+
         for i,c in enumerate(cliques):
             cmol = get_clique_mol(self.mol, c)
             if cmol is None:
@@ -83,11 +88,16 @@ class MolTree(object):
             self.nodes.append(node)
             if min(c) == 0 and cmol is not None: root = i 
 
+        # print('self.n_errors: ', self.n_errors)
         for x,y in edges:
             if self.nodes[x] is not None and self.nodes[y] is not None:
+               # print('Adding edge.')
                self.nodes[x].add_neighbor(self.nodes[y])
                self.nodes[y].add_neighbor(self.nodes[x])
-        
+            else:
+               # print('Skipping edge.')
+               pass
+
         if root > 0:
             self.nodes[0],self.nodes[root] = self.nodes[root],self.nodes[0]
 

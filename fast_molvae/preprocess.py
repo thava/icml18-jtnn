@@ -28,6 +28,7 @@ def tensorize(smiles, assm=True):
 
     return mol_tree
 
+
 if __name__ == "__main__":
     lg = rdkit.RDLogger.logger() 
     lg.setLevel(rdkit.RDLogger.CRITICAL)
@@ -46,13 +47,20 @@ if __name__ == "__main__":
         data = [line.strip("\r\n ").split()[0] for line in f]
 
     all_data = pool.map(tensorize, data)
+
     total_input_count = len(all_data)
     print("The total preprocess input size: all_data : ", total_input_count)
 
-    all_data = filter(lambda x: x is not None, all_data)
+    all_data = list(filter(lambda x: x is not None, all_data))
     print("The total preprocess input size after filter: ", len(all_data))
 
-    le = (len(all_data) + num_splits - 1) / num_splits
+    # Write filtered training set to output
+    # out_buf = '\n'.joiv(all_data)
+    # file.write(out_buf)
+    # file.close()
+    # print('Finished writing out_buf: ', out_buf)
+
+    le = int((len(all_data) + num_splits - 1) / num_splits)
 
     for split_id in xrange(num_splits):
         st = split_id * le
@@ -61,3 +69,4 @@ if __name__ == "__main__":
         with open('tensors-%d.pkl' % split_id, 'wb') as f:
             pickle.dump(sub_data, f, pickle.HIGHEST_PROTOCOL)
 
+    print('Finished preprocess. Check out the tensors-* files outputs.')

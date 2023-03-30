@@ -15,6 +15,7 @@ class JTNNDecoder(nn.Module):
 
     def __init__(self, vocab, hidden_size, latent_size, embedding):
         super(JTNNDecoder, self).__init__()
+        hidden_size = int(hidden_size)
         self.hidden_size = hidden_size
         self.vocab_size = vocab.size()
         self.vocab = vocab
@@ -27,10 +28,14 @@ class JTNNDecoder(nn.Module):
         self.W_h = nn.Linear(2 * hidden_size, hidden_size)
 
         #Word Prediction Weights 
-        self.W = nn.Linear(hidden_size + latent_size, hidden_size)
+        print(f'Hidden_size: {hidden_size}; latent_size: {latent_size};')
+        print(f'Type of sizes: {type(hidden_size)} ; {type(latent_size)} ');
+        print(f'Vocab sizes: {self.vocab_size}');
+
+        self.W = nn.Linear(int(hidden_size + latent_size), int(hidden_size))
 
         #Stop Prediction Weights
-        self.U = nn.Linear(hidden_size + latent_size, hidden_size)
+        self.U = nn.Linear(int(hidden_size + latent_size), int(hidden_size))
         self.U_i = nn.Linear(2 * hidden_size, hidden_size)
 
         #Output Weights

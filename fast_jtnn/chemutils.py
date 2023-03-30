@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
 from collections import defaultdict
 from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers, StereoEnumerationOptions
-from .vocab import Vocab
+from vocab import Vocab
 
 MST_MAX_WEIGHT = 100 
 MAX_NCAND = 2000
@@ -79,9 +79,11 @@ def get_clique_mol(mol, atoms):
     except:
         total_frag_errors += 1
         if (total_frag_errors % 10 == 0):
-            print(f'Errors: {total_frag_errors} out of {total_frag}')
+            # print(f'Errors: {total_frag_errors} out of {total_frag}')
+            pass
         else:
-            print('[Error] '),
+            # print('[Error] '),
+            pass
         return None
     new_mol = Chem.MolFromSmiles(smiles, sanitize=False)
     new_mol = copy_edit_mol(new_mol).GetMol()
