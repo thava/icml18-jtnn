@@ -4,13 +4,17 @@ from multiprocessing import Pool
 
 import math, random, sys
 from optparse import OptionParser
-import cPickle as pickle
+import pickle
 
 from fast_jtnn import *
 import rdkit
 
+xrange = range
+
 def tensorize(smiles, assm=True):
     mol_tree = MolTree(smiles)
+    if (mol_tree.n_errors > 0):
+        return None
     mol_tree.recover()
     if assm:
         mol_tree.assemble()
@@ -42,6 +46,11 @@ if __name__ == "__main__":
         data = [line.strip("\r\n ").split()[0] for line in f]
 
     all_data = pool.map(tensorize, data)
+    total_input_count = len(all_data)
+    print("The total preprocess input size: all_data : ", total_input_count)
+
+    all_data = filter(lambda x: x is not None, all_data)
+    print("The total preprocess input size after filter: ", len(all_data))
 
     le = (len(all_data) + num_splits - 1) / num_splits
 

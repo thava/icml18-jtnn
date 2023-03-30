@@ -1,7 +1,7 @@
 import rdkit
 import rdkit.Chem as Chem
-from chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
-from vocab import *
+from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
+from .vocab import *
 
 class MolTreeNode(object):
 
@@ -71,21 +71,29 @@ class MolTree(object):
 
         cliques, edges = tree_decomp(self.mol)
         self.nodes = []
+        self.n_errors = 0
         root = 0
         for i,c in enumerate(cliques):
             cmol = get_clique_mol(self.mol, c)
-            node = MolTreeNode(get_smiles(cmol), c)
+            if cmol is None:
+                self.n_errors += 1
+                node = None
+            else:
+                node = MolTreeNode(get_smiles(cmol), c)
             self.nodes.append(node)
-            if min(c) == 0: root = i
+            if min(c) == 0 and cmol is not None: root = i 
 
         for x,y in edges:
-            self.nodes[x].add_neighbor(self.nodes[y])
-            self.nodes[y].add_neighbor(self.nodes[x])
+            if self.nodes[x] is not None and self.nodes[y] is not None:
+               self.nodes[x].add_neighbor(self.nodes[y])
+               self.nodes[y].add_neighbor(self.nodes[x])
         
         if root > 0:
             self.nodes[0],self.nodes[root] = self.nodes[root],self.nodes[0]
 
         for i,node in enumerate(self.nodes):
+            if node is None:
+               continue
             node.nid = i + 1
             if len(node.neighbors) > 1: #Leaf node mol is not marked
                 set_atommap(node.mol, node.nid)
@@ -96,11 +104,13 @@ class MolTree(object):
 
     def recover(self):
         for node in self.nodes:
-            node.recover(self.mol)
+            if node is not None:
+                node.recover(self.mol)
 
     def assemble(self):
         for node in self.nodes:
-            node.assemble()
+            if node is not None:
+                node.assemble()
 
 def dfs(node, fa_idx):
     max_depth = 0
@@ -120,7 +130,8 @@ if __name__ == "__main__":
         smiles = line.split()[0]
         mol = MolTree(smiles)
         for c in mol.nodes:
-            cset.add(c.smiles)
+            if c is not None:
+               cset.add(c.smiles)
     for x in cset:
-        print x
+        print(x)
 

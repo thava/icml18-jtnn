@@ -1,12 +1,14 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-from mol_tree import MolTree
+from .mol_tree import MolTree
 import numpy as np
-from jtnn_enc import JTNNEncoder
-from mpn import MPN
-from jtmpn import JTMPN
-import cPickle as pickle
+from .jtnn_enc import JTNNEncoder
+from .mpn import MPN
+from .jtmpn import JTMPN
+import pickle
 import os, random
+
+xrange = range
 
 class PairTreeFolder(object):
 
