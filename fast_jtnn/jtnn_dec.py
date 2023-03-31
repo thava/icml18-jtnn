@@ -28,9 +28,9 @@ class JTNNDecoder(nn.Module):
         self.W_h = nn.Linear(2 * hidden_size, hidden_size)
 
         #Word Prediction Weights 
-        print(f'Hidden_size: {hidden_size}; latent_size: {latent_size};')
-        print(f'Type of sizes: {type(hidden_size)} ; {type(latent_size)} ');
-        print(f'Vocab sizes: {self.vocab_size}');
+        # print(f'Hidden_size: {hidden_size}; latent_size: {latent_size};')
+        # print(f'Type of sizes: {type(hidden_size)} ; {type(latent_size)} ');
+        # print(f'Vocab sizes: {self.vocab_size}');
 
         self.W = nn.Linear(int(hidden_size + latent_size), int(hidden_size))
 

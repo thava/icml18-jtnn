@@ -19,9 +19,9 @@ def onek_encoding_unk(x, allowable_set):
     return map(lambda s: x == s, allowable_set)
 
 def atom_features(atom):
-    return torch.Tensor(onek_encoding_unk(atom.GetSymbol(), ELEM_LIST) 
-            + onek_encoding_unk(atom.GetDegree(), [0,1,2,3,4,5]) 
-            + onek_encoding_unk(atom.GetFormalCharge(), [-1,-2,1,2,0])
+    return torch.Tensor(list(onek_encoding_unk(atom.GetSymbol(), ELEM_LIST))
+            + list(onek_encoding_unk(atom.GetDegree(), [0,1,2,3,4,5]))
+            + list(onek_encoding_unk(atom.GetFormalCharge(), [-1,-2,1,2,0]))
             + [atom.GetIsAromatic()])
 
 def bond_features(bond):

@@ -76,7 +76,10 @@ class MolTreeFolder(object):
             dataset = MolTreeDataset(batches, self.vocab, self.assm)
             dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, collate_fn=lambda x:x[0])
 
+            print('Opening dataloader')
             for b in dataloader:
+                # import json
+                # print('Yield b: datautils.py:80 ', json.dumps(b))
                 yield b
 
             del data, batches, dataset, dataloader

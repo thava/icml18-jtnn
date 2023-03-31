@@ -16,13 +16,16 @@ def set_atommap(mol, num=0):
         atom.SetAtomMapNum(num)
 
 def get_mol(smiles):
+    if not smiles:
+       return ''
     mol = Chem.MolFromSmiles(smiles)
-    if mol is None: 
-        return None
+    if not mol: 
+        return mol
     Chem.Kekulize(mol)
     return mol
 
 def get_smiles(mol):
+    if not mol: return ''
     return Chem.MolToSmiles(mol, kekuleSmiles=True)
 
 def decode_stereo(smiles2D):
@@ -42,11 +45,13 @@ def decode_stereo(smiles2D):
     return smiles3D
 
 def sanitize(mol):
+    if not mol:
+      return mol
     try:
         smiles = get_smiles(mol)
         mol = get_mol(smiles)
     except Exception as e:
-        return None
+        return ''
     return mol
 
 def copy_atom(atom):
@@ -71,9 +76,14 @@ total_frag_errors = 0
 total_frag = 0
 
 def get_clique_mol(mol, atoms):
-    smiles = None
     global total_frag, total_frag_errors
     total_frag += 1
+
+    if not mol:
+        total_frag_errors += 1
+        return mol
+
+    smiles = ''
     try:
         smiles = Chem.MolFragmentToSmiles(mol, atoms, kekuleSmiles=True)
     except:

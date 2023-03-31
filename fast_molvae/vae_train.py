@@ -83,7 +83,8 @@ for epoch in range(args.epoch):
     print('loader Done')
     for batch in loader:
         total_step += 1
-        print('Total step: ', total_step)
+        # if total_step % 100 == 0: print('Current step: ', total_step)
+        # print('Total step: ', total_step)
         try:
             model.zero_grad()
             loss, kl_div, wacc, tacc, sacc = model(batch, beta)

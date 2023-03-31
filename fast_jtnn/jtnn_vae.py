@@ -22,7 +22,7 @@ class JTNNVAE(nn.Module):
         latent_size = int(latent_size)
         self.vocab = vocab
         self.hidden_size = hidden_size
-        self.latent_size = latent_size = latent_size / 2 #Tree and Mol has two vectors
+        self.latent_size = latent_size = int(latent_size / 2) #Tree and Mol has two vectors
 
         self.jtnn = JTNNEncoder(hidden_size, depthT, nn.Embedding(vocab.size(), hidden_size))
         self.decoder = JTNNDecoder(vocab, hidden_size, latent_size, nn.Embedding(vocab.size(), hidden_size))
@@ -30,14 +30,13 @@ class JTNNVAE(nn.Module):
         self.jtmpn = JTMPN(hidden_size, depthG)
         self.mpn = MPN(hidden_size, depthG)
 
-        self.A_assm = nn.Linear(int(latent_size), int(hidden_size), bias=False)
+        self.A_assm = nn.Linear(latent_size, hidden_size, bias=False)
         self.assm_loss = nn.CrossEntropyLoss(size_average=False)
 
-        print(f'Type of hidden_size: {type(hidden_size)}')
-        self.T_mean = nn.Linear(int(hidden_size), int(latent_size))
-        self.T_var = nn.Linear(int(hidden_size), int(latent_size))
-        self.G_mean = nn.Linear(int(hidden_size), int(latent_size))
-        self.G_var = nn.Linear(int(hidden_size), int(latent_size))
+        self.T_mean = nn.Linear(hidden_size, latent_size)
+        self.T_var = nn.Linear(hidden_size, latent_size)
+        self.G_mean = nn.Linear(hidden_size, latent_size)
+        self.G_var = nn.Linear(hidden_size, latent_size)
 
     def encode(self, jtenc_holder, mpn_holder):
         tree_vecs, tree_mess = self.jtnn(*jtenc_holder)
@@ -196,7 +195,7 @@ class JTNNVAE(nn.Module):
 
         backup_mol = Chem.RWMol(cur_mol)
         pre_mol = cur_mol
-        for i in xrange(cand_idx.numel()):
+        for i in range(cand_idx.numel()):
             cur_mol = Chem.RWMol(backup_mol)
             pred_amap = cand_amap[cand_idx[i].item()]
             new_global_amap = copy.deepcopy(global_amap)

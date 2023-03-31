@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
-from multiprocessing import Pool
+
+# from multiprocessing import Pool
+from mpire import WorkerPool
 
 import math, random, sys
 from optparse import OptionParser
@@ -9,12 +11,11 @@ import pickle
 from fast_jtnn import *
 import rdkit
 
-xrange = range
-
 def tensorize(smiles, assm=True):
+    if not smiles: return ''
     mol_tree = MolTree(smiles)
     if (mol_tree.n_errors > 0):
-        return '_None_'
+        return ''
     mol_tree.recover()
     if assm:
         mol_tree.assemble()
@@ -28,7 +29,6 @@ def tensorize(smiles, assm=True):
 
     return mol_tree
 
-
 if __name__ == "__main__":
     lg = rdkit.RDLogger.logger() 
     lg.setLevel(rdkit.RDLogger.CRITICAL)
@@ -40,29 +40,36 @@ if __name__ == "__main__":
     opts,args = parser.parse_args()
     opts.njobs = int(opts.njobs)
 
-    pool = Pool(opts.njobs)
     num_splits = int(opts.nsplits)
 
     with open(opts.train_path) as f:
         data = [line.strip("\r\n ").split()[0] for line in f]
 
-    all_data = pool.map(tensorize, data)
+    # print('Read all data!')
+    # pool = Pool(opts.njobs)
+    # all_data = pool.map(tensorize, data)a
 
-    total_input_count = len(all_data)
-    print("The total preprocess input size: all_data : ", total_input_count)
+    # mpire library provides better multiprocessing support.
+    # Reports error with full stacktrace and supports excellent progress bar.
 
-    all_data = list(filter(lambda x: x is not None and x != '_None_', all_data))
-    print("The total preprocess input size after filter: ", len(all_data))
+    with WorkerPool(n_jobs=opts.njobs) as pool:
+        results = pool.map(tensorize, data, progress_bar=True)
+
+    total_input_count = len(results)
+    print('The total count of preprocess input entries: ', total_input_count)
+
+    all_data = list(filter(lambda x: (not not x), results))
+    print('Input count after filtering out invalid entries: ', len(all_data))
 
     # Write filtered training set to output
-    # out_buf = '\n'.joiv(all_data)
-    # file.write(out_buf)
-    # file.close()
+    # with open('/tmp/valid_train.txt', 'w') as file:
+    #   out_buf = '\n'.join(all_data)
+    #   file.write(out_buf)
     # print('Finished writing out_buf: ', out_buf)
 
     le = int((len(all_data) + num_splits - 1) / num_splits)
 
-    for split_id in xrange(num_splits):
+    for split_id in range(num_splits):
         st = split_id * le
         sub_data = all_data[st : st + le]
 
