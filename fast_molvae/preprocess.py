@@ -8,6 +8,10 @@ import math, random, sys
 from optparse import OptionParser
 import pickle
 
+# import os, sys
+# sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+# sys.path.append(os.getcwd())
+
 from fast_jtnn import *
 import rdkit
 

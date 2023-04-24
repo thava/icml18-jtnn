@@ -1,7 +1,7 @@
 import rdkit
 import rdkit.Chem as Chem
-from .chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
-from .vocab import *
+from chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atommap, enum_assemble, decode_stereo
+from vocab import *
 import pprint
 import json
 
@@ -64,7 +64,14 @@ class MolTree(object):
     def __init__(self, smiles):
         # print('MolTree init. smiles: ', smiles)
         self.smiles = smiles
+        self.nodes = []
+        self.n_errors = 0
+
         self.mol = get_mol(smiles)
+
+        if (self.mol is None):
+            self.n_errors += 1
+            return
 
         #Stereo Generation (currently disabled)
         #mol = Chem.MolFromSmiles(smiles)
@@ -73,8 +80,6 @@ class MolTree(object):
         #self.stereo_cands = decode_stereo(self.smiles2D)
 
         cliques, edges = tree_decomp(self.mol)
-        self.nodes = []
-        self.n_errors = 0
         root = 0
         # print('cliques: ', json.dumps(cliques, indent=2))
 
@@ -86,7 +91,7 @@ class MolTree(object):
             else:
                 node = MolTreeNode(get_smiles(cmol), c)
             self.nodes.append(node)
-            if min(c) == 0 and cmol is not None: root = i 
+            if min(c) == 0 and cmol is not None: root = i
 
         # print('self.n_errors: ', self.n_errors)
         for x,y in edges:
@@ -135,10 +140,22 @@ if __name__ == "__main__":
     lg = rdkit.RDLogger.logger() 
     lg.setLevel(rdkit.RDLogger.CRITICAL)
 
+    total_invalid_mols = 0
+    total_mols = 0
     cset = set()
     for line in sys.stdin:
-        smiles = line.split()[0]
+        smiles_list = line.split()
+        if len(smiles_list) < 1:
+            continue
+        smiles = smiles_list[0]
+        total_mols += 1
         mol = MolTree(smiles)
+        if mol is None or mol.n_errors > 0:
+            total_invalid_mols += 1
+            # Print 5 invalid entries every 1000 ones.
+            if total_invalid_mols % 1000 < 5:
+                sys.stderr.write(f'Total Mols: {total_mols}; Total Invalids: {total_invalid_mols}')
+            continue
         for c in mol.nodes:
             if c is not None:
                cset.add(c.smiles)
