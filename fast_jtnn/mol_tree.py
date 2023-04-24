@@ -4,6 +4,7 @@ from chemutils import get_clique_mol, tree_decomp, get_mol, get_smiles, set_atom
 from vocab import *
 import pprint
 import json
+from tqdm import tqdm
 
 class MolTreeNode(object):
 
@@ -143,18 +144,25 @@ if __name__ == "__main__":
     total_invalid_mols = 0
     total_mols = 0
     cset = set()
-    for line in sys.stdin:
+    all_lines = sys.stdin.read().splitlines()
+    total_lines = len(all_lines)
+    for i in tqdm(range(total_lines)):
+        line = all_lines[i]
         smiles_list = line.split()
         if len(smiles_list) < 1:
+            sys.stderr.write(f'\nEmpty line {i} in smiles input ignored!\n')
+            sys.stderr.flush()
             continue
         smiles = smiles_list[0]
         total_mols += 1
+
         mol = MolTree(smiles)
         if mol is None or mol.n_errors > 0:
             total_invalid_mols += 1
             # Print 5 invalid entries every 1000 ones.
             if total_invalid_mols % 1000 < 5:
-                sys.stderr.write(f'Total Mols: {total_mols}; Total Invalids: {total_invalid_mols}')
+                sys.stderr.write(f'\nTotal Mols: {total_mols}; Total Invalids: {total_invalid_mols}\n')
+                sys.stderr.flush()
             continue
         for c in mol.nodes:
             if c is not None:
