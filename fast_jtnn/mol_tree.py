@@ -146,7 +146,7 @@ if __name__ == "__main__":
     cset = set()
     all_lines = sys.stdin.read().splitlines()
     total_lines = len(all_lines)
-    for i in tqdm(range(total_lines)):
+    for i in tqdm(range(total_lines), mininterval=1.0):
         line = all_lines[i]
         smiles_list = line.split()
         if len(smiles_list) < 1:
