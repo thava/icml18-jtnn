@@ -46,8 +46,13 @@ if __name__ == "__main__":
 
     num_splits = int(opts.nsplits)
 
+    data = []
     with open(opts.train_path) as f:
-        data = [line.strip("\r\n ").split()[0] for line in f]
+        for line in f:
+            line = line.strip("\r\n ")
+            if not line:
+                continue
+            data.append(line.split()[0])
 
     # print('Read all data!')
     # pool = Pool(opts.njobs)

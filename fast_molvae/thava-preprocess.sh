@@ -7,6 +7,8 @@
 
 echo Starting ...;   date
 
+export PYTHONPATH=$PWD/..:$PWD/../fast_jtnn
+
 python preprocess.py --train ../data/moses/train.txt --split 100 --jobs 16
 
 mkdir -p moses-processed
